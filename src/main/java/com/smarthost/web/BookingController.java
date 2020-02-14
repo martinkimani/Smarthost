@@ -28,8 +28,8 @@ public class BookingController {
         this.bookingService = bookingService;
     }
     
-    @PostMapping("/analyze-bookings")
-    public ResponseEntity getBookingAnalysis(@RequestBody Vacancy vacancies) {
+    @PostMapping("/projections")
+    public ResponseEntity getBookingProjections(@RequestBody Vacancy vacancies) {
         return new ResponseEntity(bookingService.analyzeBookings(vacancies.getPremiumVacancies(), vacancies.getEconomyVacancies()), HttpStatus.OK);
     }
     

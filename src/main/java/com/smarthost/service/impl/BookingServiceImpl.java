@@ -30,33 +30,31 @@ public class BookingServiceImpl implements IBookingService {
     @Override
     public VacancyUsage analyzeBookings(int premiumVacancies, int economyVacancies) {
         Integer[] prices = returnUserPrices();
-        var premium_usage = 0;
-        var premium_amount = 0;
-        var economy_usage = 0;
-        var economy_amount = 0;
+        var premiumUsage = 0;
+        var premiumAmount = 0;
+        var economyUsage = 0;
+        var economyAmount = 0;
 
         Arrays.sort(prices);
         for (int i = prices.length - 1; i >= 0; i--) {
             if (premiumVacancies > 0 && (prices[i] >= 100 || (prices[i] < 100 && i >= economyVacancies))) {
-                premium_usage++;
-                premium_amount += prices[i];
+                premiumUsage++;
+                premiumAmount += prices[i];
                 premiumVacancies--;
-            }
-            if (premiumVacancies == 0) break;
+            } else if(premiumVacancies == 0) break;
         }
 
-        int econ_start = prices.length - premium_usage - 1;
-        for (int i = econ_start; i >= 0; i--) {
+        int econStartingPoint = prices.length - premiumUsage - 1;
+        for (int i = econStartingPoint; i >= 0; i--) {
             if (economyVacancies > 0 && prices[i] < 100) {
-                economy_usage++;
-                economy_amount += prices[i];
+                economyUsage++;
+                economyAmount += prices[i];
                 economyVacancies--;
-            }
-            if (economyVacancies == 0) break;
+            } else if (economyVacancies == 0) break;
         }
-        var premiumUsage = String.format("Usage Premium: %d (EUR %d)", premium_usage, premium_amount);
-        var EconomyUsage = String.format("Usage Economy: %d (EUR %d)", economy_usage, economy_amount);
-        return VacancyUsage.builder().premiumUsage(premiumUsage).economyUsage(EconomyUsage).build();
+        var premiumUsageResponse = String.format("Usage Premium: %d (EUR %d)", premiumUsage, premiumAmount);
+        var economyUsageResponse = String.format("Usage Economy: %d (EUR %d)", economyUsage, economyAmount);
+        return VacancyUsage.builder().premiumUsage(premiumUsageResponse).economyUsage(economyUsageResponse).build();
 
     }
 

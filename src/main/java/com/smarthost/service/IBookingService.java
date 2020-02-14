@@ -5,7 +5,6 @@
  */
 package com.smarthost.service;
 
-import com.smarthost.model.Vacancy;
 import com.smarthost.model.VacancyUsage;
 
 /**

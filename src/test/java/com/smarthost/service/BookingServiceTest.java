@@ -3,13 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.smarthost;
+package com.smarthost.service;
 
 import com.smarthost.model.Guest;
 import com.smarthost.model.VacancyUsage;
 import com.smarthost.repository.GuestsRepository;
-import com.smarthost.service.IBookingService;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
@@ -22,8 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 
 /**
  *
@@ -41,8 +37,9 @@ public class BookingServiceTest {
     GuestsRepository guestRepository;
     
     @BeforeAll
-    public void generateGuestList() {
-        List<Guest> guests = Arrays.asList(new Guest("guest1", 23),
+    void generateGuestList() {
+        List<Guest> guests = Arrays.asList(
+                new Guest("guest1", 23),
                 new Guest("guest2", 45),
                 new Guest("guest3", 155),
                 new Guest("guest4", 374),
@@ -56,8 +53,8 @@ public class BookingServiceTest {
     }
     
     @Test
-    @DisplayName("Test with 3 premium and 3 ecomony vacancies")
-    public void threePremiumThreeEconomyTest() {
+    @DisplayName("Tests for correct occupancy projections")
+    void projectionsCorrectnessTest() {
         VacancyUsage vacancyUsage = bookingService.analyzeBookings(3, 3);
         Assertions.assertEquals("Usage Premium: 3 (EUR 738)", vacancyUsage.getPremiumUsage(), "Premium: should return 3 as usage and 738 as amount");
         Assertions.assertEquals("Usage Economy: 3 (EUR 167)", vacancyUsage.getEconomyUsage(), "Economy: should return 3 as usage and 167 as amount");
@@ -73,5 +70,17 @@ public class BookingServiceTest {
         VacancyUsage vacancyUsage3 = bookingService.analyzeBookings(7, 1);
         Assertions.assertEquals("Usage Premium: 7 (EUR 1153)", vacancyUsage3.getPremiumUsage(), "Premium: should return 7 as usage and 1153 as amount");
         Assertions.assertEquals("Usage Economy: 1 (EUR 45)", vacancyUsage3.getEconomyUsage(), "Economy: should return 1 as usage and 45 as amount");
+    }
+    
+    @Test
+    @DisplayName("Tests for zero and negative occupancy cases")
+    void edgeCasesTest() {
+        VacancyUsage vacancyUsage = bookingService.analyzeBookings(0, 0);
+        Assertions.assertEquals("Usage Premium: 0 (EUR 0)", vacancyUsage.getPremiumUsage(), "Premium: should return 0 as usage and 0 as amount");
+        Assertions.assertEquals("Usage Economy: 0 (EUR 0)", vacancyUsage.getEconomyUsage(), "Economy: should return 0 as usage and 0 as amount");
+        
+        VacancyUsage vacancyUsage1 = bookingService.analyzeBookings(-7, -5);
+        Assertions.assertEquals("Usage Premium: 0 (EUR 0)", vacancyUsage1.getPremiumUsage(), "Premium: should return 0 as usage and 0 as amount");
+        Assertions.assertEquals("Usage Economy: 0 (EUR 0)", vacancyUsage1.getEconomyUsage(), "Economy: should return 0 as usage and 0 as amount");
     }
 }
