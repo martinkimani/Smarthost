@@ -9,8 +9,10 @@ import com.smarthost.repository.GuestsRepository;
 import com.smarthost.model.Guest;
 import com.smarthost.model.VacancyUsage;
 import com.smarthost.service.IBookingService;
-import java.util.Arrays;
+import java.util.Comparator;
+import java.util.IntSummaryStatistics;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
@@ -28,40 +30,37 @@ public class BookingServiceImpl implements IBookingService {
     }
 
     @Override
-    public VacancyUsage analyzeBookings(int premiumVacancies, int economyVacancies) {
-        Integer[] prices = returnUserPrices();
-        var premiumUsage = 0;
-        var premiumAmount = 0;
-        var economyUsage = 0;
-        var economyAmount = 0;
-
-        Arrays.sort(prices);
-        for (int i = prices.length - 1; i >= 0; i--) {
-            if (premiumVacancies > 0 && (prices[i] >= 100 || (prices[i] < 100 && i >= economyVacancies))) {
-                premiumUsage++;
-                premiumAmount += prices[i];
-                premiumVacancies--;
-            } else if(premiumVacancies == 0) break;
-        }
-
-        int econStartingPoint = prices.length - premiumUsage - 1;
-        for (int i = econStartingPoint; i >= 0; i--) {
-            if (economyVacancies > 0 && prices[i] < 100) {
-                economyUsage++;
-                economyAmount += prices[i];
-                economyVacancies--;
-            } else if (economyVacancies == 0) break;
-        }
-        var premiumUsageResponse = String.format("Usage Premium: %d (EUR %d)", premiumUsage, premiumAmount);
-        var economyUsageResponse = String.format("Usage Economy: %d (EUR %d)", economyUsage, economyAmount);
+    public VacancyUsage analyzeBookings(int premiumRooms, int economyRooms) {
+        var premiumVacancies = premiumRooms < 0 ? 0 : premiumRooms;
+        var economyVacancies = economyRooms < 0 ? 0 : economyRooms;
+        List<Integer> prices = returnUserPrices();
+        AtomicInteger index = new AtomicInteger();
+        index.set(prices.size()-1);
+        IntSummaryStatistics premiumSummary = prices.stream()
+                .sorted(Comparator.reverseOrder())
+                .filter(price-> (index.decrementAndGet()>= economyVacancies && price < 100)  || price >= 100)
+                .limit(premiumVacancies)
+                .mapToInt(Integer::intValue)
+                .summaryStatistics();
+        
+        var premiumUsage = premiumSummary.getCount();
+        IntSummaryStatistics economySummary = prices.stream()
+                .sorted(Comparator.reverseOrder())
+                .skip(premiumUsage)
+                .filter(price -> price < 100)
+                .limit(economyVacancies)
+                .mapToInt(Integer::intValue)
+                .summaryStatistics();
+        
+        var premiumUsageResponse = String.format("Usage Premium: %d (EUR %d)", premiumSummary.getCount(), premiumSummary.getSum());
+        var economyUsageResponse = String.format("Usage Economy: %d (EUR %d)", economySummary.getCount(), economySummary.getSum());
         return VacancyUsage.builder().premiumUsage(premiumUsageResponse).economyUsage(economyUsageResponse).build();
 
     }
 
-    public Integer[] returnUserPrices() {
+    public List<Integer> returnUserPrices() {
         List<Guest> guests = guestRepository.findAll();
-        List<Integer> pricesList = guests.stream().map(guest -> guest.getPrice()).collect(Collectors.toList());
-        return pricesList.stream().toArray(Integer[]::new);
+        return guests.stream().map(guest -> guest.getPrice()).collect(Collectors.toList());
     }
 
 }

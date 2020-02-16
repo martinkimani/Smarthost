@@ -30,7 +30,8 @@ public class BookingController {
     
     @PostMapping("/projections")
     public ResponseEntity getBookingProjections(@RequestBody Vacancy vacancies) {
-        return new ResponseEntity(bookingService.analyzeBookings(vacancies.getPremiumVacancies(), vacancies.getEconomyVacancies()), HttpStatus.OK);
+        return new ResponseEntity(bookingService.analyzeBookings(vacancies.getPremiumVacancies(), 
+                vacancies.getEconomyVacancies()), HttpStatus.OK);
     }
     
 }
