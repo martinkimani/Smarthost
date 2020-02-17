@@ -7,7 +7,6 @@ package com.smarthost.model;
 
 import java.io.Serializable;
 import javax.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,6 +31,12 @@ public class Guest implements Serializable{
     }
     
     public Guest(String name, Integer price){
+        this.name = name;
+        this.price = price;
+    }
+    
+    public Guest(Integer id,String name, Integer price) {
+        this.id = id;
         this.name = name;
         this.price = price;
     }

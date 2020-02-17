@@ -5,8 +5,6 @@
  */
 package com.smarthost.web;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smarthost.model.Vacancy;
 import com.smarthost.model.VacancyUsage;
 import com.smarthost.service.IBookingService;
