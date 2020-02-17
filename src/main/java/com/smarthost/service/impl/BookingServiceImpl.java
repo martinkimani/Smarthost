@@ -33,7 +33,7 @@ public class BookingServiceImpl implements IBookingService {
     public VacancyUsage analyzeBookings(int premiumRooms, int economyRooms) {
         var premiumVacancies = premiumRooms < 0 ? 0 : premiumRooms;
         var economyVacancies = economyRooms < 0 ? 0 : economyRooms;
-        List<Integer> prices = returnUserPrices();
+        List<Integer> prices = returnGuestPrices();
         AtomicInteger index = new AtomicInteger();
         index.set(prices.size()-1);
         IntSummaryStatistics premiumSummary = prices.stream()
@@ -58,7 +58,7 @@ public class BookingServiceImpl implements IBookingService {
 
     }
 
-    public List<Integer> returnUserPrices() {
+    public List<Integer> returnGuestPrices() {
         List<Guest> guests = guestRepository.findAll();
         return guests.stream().map(guest -> guest.getPrice()).collect(Collectors.toList());
     }
